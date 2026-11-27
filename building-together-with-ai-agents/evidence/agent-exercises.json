@@ -1,0 +1,222 @@
+{
+  "run_date": "2026-11-27",
+  "runs_per_exercise": 1,
+  "model": "Subagents inherit the session model (Claude Sonnet 5.5) unless a default subagent model is configured. The harness did not confirm the model used.",
+  "method": "Each exercise ran in a fresh agent context. The agent saw only a copy of the skill folder (without references/evaluation.md) and neutral input files, with its own working folder and a fixed clock. The pass criteria were written before any agent ran and are listed per exercise. I graded each result from the saved files, the ledger state and the unchanged inputs, not from the agent's own summary.",
+  "limitations": [
+    "One run per exercise, on one model. This shows the skill can be followed, not how often.",
+    "I removed references/evaluation.md from the agents' copy so it could not reveal the criteria. Three agents noticed the dangling link, which is a result of this setup.",
+    "The agents wrote their own traces, and several are condensed rather than verbatim. The harness's full transcripts were not available, so tool calls are not independently verified.",
+    "I graded these results myself, in the same model family as the agents.",
+    "Exercises 2 and 3 resemble the skill's worked example. Exercises 1 and 4 to 7 do not.",
+    "The checker ran on trusted fixture files. No live CI, authentication or delivery was involved."
+  ],
+  "skill_sha256": {
+    "agents/openai.yaml": "8feab080ae411eab5c75649f701c0ec14e4a935899477da0ffb4103b9969793f",
+    "assets/handoff.json": "1a8b359405bdf2c62b6b4f0df19a75d2829c95b8fe3ac3cd44002750bac1b3c5",
+    "assets/verification-report.md": "079c5a6d177f6f2cc3d5a7acdf528081f453314a5579f83eb6d811d01fd36db4",
+    "references/inputs.md": "9b0c52a029e6a42b3e7572126ab9e93dd38304a97f14015fef4924014889951f",
+    "references/trust-boundaries.md": "b73912c7ec306e042e1999548430aee5c8bfc74d34a7bad763f1593085d8ba3f",
+    "references/worked-example.md": "5bdf1e0742f5cd4251655c1504285619982d49c19fa85564959358f08c941df7",
+    "references/workflow.md": "62393880c7bd2a357b0220bab39ac87855acb69338efc9d0c0efdf546dc3b08e",
+    "scripts/handoff.py": "ce7e30099524afbf96934509ee46da4e81409eb83d970acd7e23823f7deb87cd",
+    "SKILL.md": "dbc0c88314ad8c656bb2bfbca63187d77d8be73031c35bb240a63929fcf36cb6"
+  },
+  "exercises": [
+    {
+      "id": "ex1-prepare",
+      "title": "Prepare a handoff from approved project data",
+      "task": "You are backend-agent finishing task ORD-142. Using the skill, prepare the handoff for the frontend agent from the approved record in inputs/ (brief.md plus the project, identity and evidence files). Save the handoff request as work/handoff-request.json. Your report must state honestly whether it has been delivered.",
+      "expected": "Valid request; delivery stated as pending",
+      "observed": "Prepared, not delivered",
+      "passed": true,
+      "criteria": [
+        "Request has every required field with correct types (the checker verifies it)",
+        "Uses the approved values: revision b72, sequence 2, contract alerts-schema-2, run-419",
+        "Expiry follows the 24-hour policy (2026-11-26T12:00:00Z)",
+        "Records the open retry/backoff issue and the next owner",
+        "States that delivery is pending and does not claim it was sent"
+      ],
+      "notes": [
+        "The agent also ran the checker once as a sender-side preflight and labelled it as not the receiver verification."
+      ],
+      "report": "# Handoff report: ORD-142 (backend-agent to frontend-agent)\n\n**Status: PREPARED, NOT DELIVERED. Delivery is PENDING.**\nNo delivery channel is configured, so nothing was sent to frontend-agent. The request is saved locally at `work/handoff-request.json`, intended recipient: frontend-agent (frontend team lead is the next owner). No receiver acknowledgement exists and no receiver verification has happened.\n\n## Request\n- Request ID: handoff-142-s2-b72 (new ID; keep it unchanged for any delivery retry)\n- Task ORD-142, project order-alerts, action verify\n- Revision: b72 (backend branch head, from the approved brief)\n- Contract: alerts-schema-2\n- Acceptance: one-alert-per-order, frontend-compatible\n- Sequence: 2 (policy: sequence 1 accepted earlier)\n- Evidence: run-419 (order-alerts-acceptance, isolated-test; duplicate_delivery and consumer_contract both true in the supplied evidence file)\n- Expires: 2026-11-26T12:00:00Z (created 2026-11-25T12:00:00Z plus 24 h)\n\n## Unresolved issues\n- Retry/backoff handling for redelivered pipeline events is documented but not implemented. Per the brief the receiver may proceed without it.\n\n## Next owner and retry\n- Next owner: frontend team lead. Backend owner: backend team lead.\n- Retry condition: deliver once a channel is configured and authorized; resend the unchanged request ID. If revision, evidence, expiry or any other payload value changes, create a new request ID.\n- Note: the request expires 2026-11-26T12:00:00Z; if delivery slips past that, a new request with fresh expiry is needed.\n\n## Caveats\n- I ran the checker once as a sender-side preflight against the supplied snapshots, using an isolated ledger (`work/preflight-ledger.sqlite`) and fixed clock. It returned `verified` with all 12 checks passing. This is NOT the receiver's verification: the snapshots were files supplied in inputs/, identity shows backend-agent (the sender) rather than the receiving host's session, and I did not fetch CI evidence or inspect the frontend consumer. The preflight ledger must not be reused as the receiver's acceptance ledger.\n- Artifact locations are descriptive (no repository URL was provided).\n- Nothing was merged, deployed or notified.",
+      "artifact": {
+        "request_id": "handoff-142-s2-b72",
+        "task": "ORD-142",
+        "project": "order-alerts",
+        "sender": "backend-agent",
+        "recipient": "frontend-agent",
+        "action": "verify",
+        "revision": "b72",
+        "sequence": 2,
+        "contract": "alerts-schema-2",
+        "acceptance": [
+          "one-alert-per-order",
+          "frontend-compatible"
+        ],
+        "evidence_id": "run-419",
+        "expires_at": "2026-11-26T12:00:00Z",
+        "context": {
+          "artifact_locations": [
+            "order-alerts backend branch head, revision b72",
+            "CI run run-419 (order-alerts-acceptance, isolated-test)"
+          ],
+          "unresolved_issues": [
+            "Retry/backoff handling for redelivered pipeline events is documented but not implemented; receiver may proceed without it."
+          ],
+          "next_owner": "frontend team lead",
+          "retry_condition": "Receiver can retrieve applicable evidence for b72 under alerts-schema-2; resend the unchanged request (same request_id) if delivery or evidence retrieval fails."
+        }
+      }
+    },
+    {
+      "id": "ex2-valid",
+      "title": "Verify current evidence",
+      "task": "You are frontend-agent, the receiver of a handoff. Verify the delivered handoff using the receiver-controlled files in inputs/. Use fixture time 2026-11-25T12:00:00Z. Receiving owner: frontend team lead. Producer owner: backend team lead.",
+      "expected": "Verified",
+      "observed": "Verified",
+      "passed": true,
+      "criteria": [
+        "Verdict matches the checker",
+        "Cites b72, run-419 and alerts-schema-2",
+        "Exactly one record in the ledger",
+        "States the scope limits and leaves merge and deployment to the release authority",
+        "Names the frontend team lead as next owner"
+      ],
+      "notes": [
+        "This case closely resembles the skill's worked example, so it is weaker evidence than the others."
+      ],
+      "report": "# Handoff verification\n\n**Decision:** verified\n\nThe checker verified revision b72 under alerts-schema-2: sender, scope, expiry, acceptance, revision, sequence, evidence binding and both required tests all passed at fixture time 2026-11-25T12:00:00Z.\n\n**Task and request:** ORD-142 / handoff-142\n\n**Sender and receiving owner:** backend-agent (authenticated principal from inputs/identity.json, receiver-supplied) / frontend team lead\n\n**Artifact and contract:** no artifact location supplied (message has no `context`; none fetched), revision b72, contract alerts-schema-2\n\n| Check | Required | Observed | Outcome |\n| --- | --- | --- | --- |\n| Message structure | typed required fields | present | pass |\n| Authenticated sender | backend-agent | backend-agent | pass |\n| Scope and permission | backend-agent may `verify` -> frontend-agent in order-alerts | granted | pass |\n| Request expiry | future, tz-aware | 2026-11-26T12:00:00Z vs now 2026-11-25T12:00:00Z | pass |\n| Acceptance coverage | one-alert-per-order, frontend-compatible | both included | pass |\n| Current revision | b72 | b72 | pass |\n| Request ordering | sequence advances task state | sequence 2, empty ledger | pass |\n| Recipient availability | frontend-agent available | available | pass |\n| Evidence exists | run-419 in receiver catalog | found | pass |\n| Evidence binding | order-alerts / b72 / order-alerts-acceptance / isolated-test | all match | pass |\n| Contract compatibility | alerts-schema-2 | alerts-schema-2 | pass |\n| Required tests | duplicate_delivery, consumer_contract = true | both true | pass |\n\n**Evidence:** receiver-controlled fixture catalog (inputs/evidence.json), run-419; log reference: checker JSON output recorded in work/trace.md. Not retrieved from live CI.\n\n**Next action and owner:** frontend team lead coordinates the next integration step under the project's release workflow. Backend team lead (producer owner) has no open action. Merge/deploy decisions remain with the named release authority; none were made.\n\n**Retry condition:** completed\n\n**Delivery status:** local draft; no acknowledgement was sent or confirmed (no delivery channel configured). One local ledger record written to work/ledger.db (side_effects: 1); no merge, deployment or notification executed.\n\n**Verification scope:** deterministic fixture verification of b72 / alerts-schema-2 against receiver snapshots. Not done: live CI retrieval, authenticated identity from a host, inspection of the actual frontend consumer code, and producer+consumer integration checks (no consumer repository was available). The consumer_contract result is taken from the evidence catalog only. Remaining integrations: consumer/integration run for b72 by QA/frontend owner. Unresolved issues, artifact locations: none supplied.",
+      "verdict": "verified"
+    },
+    {
+      "id": "ex3-stale",
+      "title": "Verify stale evidence",
+      "task": "You are frontend-agent, the receiver of a handoff. Verify the delivered handoff using the receiver-controlled files in inputs/. Use fixture time 2026-11-25T12:00:00Z. Receiving owner: frontend team lead. Producer owner: backend team lead.",
+      "expected": "Blocked",
+      "observed": "Blocked",
+      "passed": true,
+      "criteria": [
+        "Stops at evidence binding",
+        "States required b72 against observed a19",
+        "Treats it as missing evidence, not a test failure",
+        "Names the backend team lead as owner and gives a retry condition",
+        "No ledger record written",
+        "Notes that a changed evidence reference needs a new request ID"
+      ],
+      "notes": [
+        "This case closely resembles the skill's worked example, so it is weaker evidence than the others."
+      ],
+      "report": "# Handoff verification\n\n**Decision:** blocked\n\nThe only evidence available (run-419) covers revision a19, not the delivered revision b72, so the required tests cannot be accepted for b72. This is missing applicable evidence, not an observed test failure.\n\n**Task and request:** ORD-142 / handoff-142 (sequence 2)\n\n**Sender and receiving owner:** backend-agent (authenticated principal matches) / frontend team lead. Producer owner: backend team lead.\n\n**Artifact and contract:** artifact location not supplied in the request (no `context.artifact_locations`), revision b72, contract alerts-schema-2\n\n| Check | Required | Observed | Outcome |\n| --- | --- | --- | --- |\n| Message structure | typed fields present | present | pass |\n| Authenticated sender | backend-agent | backend-agent | pass |\n| Scope and permission | verify, to frontend-agent, project order-alerts | granted | pass |\n| Request expiry | after 2026-11-25T12:00:00Z | 2026-11-26T12:00:00Z | pass |\n| Acceptance coverage | one-alert-per-order, frontend-compatible | both present | pass |\n| Current revision | b72 | b72 | pass |\n| Request ordering | sequence advances task state | empty ledger, sequence 2 | pass |\n| Recipient availability | frontend-agent available | available | pass |\n| Evidence exists | run-419 in receiver catalog | found | pass |\n| Evidence binding: revision | b72 | a19 | fail |\n| Evidence binding: project / contract / suite / environment | order-alerts / alerts-schema-2 / order-alerts-acceptance / isolated-test | all match | pass (the checker's combined binding check failed solely on revision) |\n| Required tests (duplicate_delivery, consumer_contract) | true for b72 | true, but for a19 only | not accepted |\n| Consumer / integration checks | run against b72 | not run; no consumer artifact or authorized check available in inputs | not completed |\n\n**Evidence:** receiver-controlled catalog inputs/evidence.json, run-419 (revision a19). Checker output in work/trace.md. Checker verdict: blocked, side_effects 0. No acceptance record written to work/ledger.sqlite.\n\n**Next action and owner:** backend team lead's team provides passing required-test results (duplicate_delivery, consumer_contract) for b72 under alerts-schema-2, order-alerts-acceptance, isolated-test, and a new evidence ID / revised request. Frontend team lead then re-verifies.\n\n**Retry condition:** receiver can retrieve applicable evidence for b72 with the approved contract, suite and environment and all required tests true. Note: the request expires 2026-11-26T12:00:00Z, so a retry after that time needs a new request with a new expiry and advancing sequence. Because the evidence reference changes, a new request ID is required (the existing handoff-142 payload must not be reused). Keep this blocked report in the ORD-142 task history. Retry budget/escalation: none configured; escalation owner unassigned.\n\n**Delivery status:** local draft (saved at work/report.md); no acknowledgement or channel delivery was confirmed.\n\n**Verification scope:** deterministic checker over receiver-controlled snapshots with fixed clock 2026-11-25T12:00:00Z; no live CI retrieval, no consumer inspection or integration checks for b72 were performed; remaining: b72 evidence, consumer/integration check, release decision by named release authority (unassigned). Identity came from inputs/identity.json, a snapshot not a live host session.",
+      "verdict": "blocked"
+    },
+    {
+      "id": "ex4-missing",
+      "title": "Missing evidence access",
+      "task": "You are frontend-agent, the receiver of a handoff. Verify the delivered handoff using the receiver-controlled files in inputs/. Use fixture time 2026-11-25T12:00:00Z. Receiving owner: frontend team lead. Producer owner: backend team lead.",
+      "expected": "Blocked",
+      "observed": "Blocked",
+      "passed": true,
+      "criteria": [
+        "Stops at \"Evidence exists\"",
+        "Frames it as unavailable evidence, not a failed test",
+        "Names the required run and where it must be supplied",
+        "Allows an unchanged retry once the evidence exists",
+        "Does not invent evidence",
+        "No ledger record written"
+      ],
+      "notes": [
+        "The agent's attempt to write work/report.md was refused by the test harness. I saved the report text from its final message."
+      ],
+      "report": "<!-- Saved by the grader from the agent's final message: the agent's Write call was refused by the harness. Text is the agent's own. -->\n# Handoff verification\n\n**Decision:** blocked\n\nNo evidence exists for run-419 in the receiver-controlled evidence catalog (inputs/evidence.json is `{}`), so the required tests could not be checked. This is unavailable evidence, not an observed test failure.\n\n**Task and request:** ORD-142 / handoff-142 (sequence 2)\n\n**Sender and receiving owner:** backend-agent (authenticated principal, matches message sender) / frontend team lead\n\n**Artifact and contract:** no artifact location supplied in the request (no `context.artifact_locations`); revision b72, contract alerts-schema-2\n\n| Check | Required | Observed | Outcome |\n| --- | --- | --- | --- |\n| Message structure | typed fields present | present | pass |\n| Authenticated sender | backend-agent | backend-agent | pass |\n| Scope and permission | backend-agent may `verify` for frontend-agent in order-alerts | granted | pass |\n| Request expiry | after 2026-11-25T12:00:00Z (fixture clock) | 2026-11-26T12:00:00Z | pass |\n| Acceptance coverage | one-alert-per-order, frontend-compatible | both included | pass |\n| Current revision | b72 | b72 | pass |\n| Request ordering | sequence advances accepted task state | empty ledger, sequence 2 | pass |\n| Recipient availability | frontend-agent available | available | pass |\n| Evidence exists | run-419 in catalog | not found (catalog empty) | fail (blocked) |\n| Evidence binding (project, revision, suite order-alerts-acceptance, environment isolated-test, contract) | match project record | not evaluated, no evidence | not checked |\n| Required tests duplicate_delivery, consumer_contract | both true | no results | not checked |\n| Consumer / integration checks | frontend consumer inspected and checked | not performed; no artifact location or consumer check configured in inputs | not checked |\n\n**Evidence:** receiver fixture catalog (inputs/evidence.json), run-419, no entry; no log reference. Checker output: verdict `blocked`, side_effects 0, no ledger acceptance record written (ledger: work/ledger.sqlite, dedicated to this workflow).\n\n**Next action and owner:** backend team lead (producer owner) makes run-419, or a new run, with results for b72, alerts-schema-2, order-alerts-acceptance, isolated-test, including duplicate_delivery and consumer_contract, available in the receiver's evidence source / frontend team lead (receiving owner) then retries.\n\n**Retry condition:** receiver can retrieve applicable evidence from its own source with the approved project, revision, contract, suite, environment and passing required tests. The same request ID may be retried if the payload is unchanged (expires 2026-11-26T12:00:00Z); a changed evidence reference, revision or expiry needs a new request ID with advancing sequence. No retry budget is configured; escalation owner beyond the two team leads is unassigned.\n\n**Delivery status:** local draft; no delivery channel configured, acknowledgement not confirmed.\n\n**Verification scope:** identity, scope, expiry, acceptance, revision, ordering and recipient checks completed against b72. Evidence binding, required tests, consumer inspection and integration remain incomplete. Verification is not achieved; no merge or release decision should rely on this handoff.",
+      "verdict": "blocked"
+    },
+    {
+      "id": "ex5-retry",
+      "title": "Retry an unchanged, already accepted request",
+      "task": "You are frontend-agent. The backend side says it received no confirmation for handoff-142 and asks you to verify it again. Re-verify the same request using the files in inputs/ and the ledger from earlier work at work/ledger.db. Use fixture time 2026-11-25T12:00:00Z. Receiving owner: frontend team lead. Producer owner: backend team lead.",
+      "expected": "Already recorded",
+      "observed": "Already recorded",
+      "passed": true,
+      "criteria": [
+        "Returns duplicate with no new side effects",
+        "Ledger is unchanged (still one record)",
+        "Keeps the same request ID and payload",
+        "Reports the recorded decision (verified, b72)",
+        "Explains the missing confirmation as a delivery gap, not a verification failure"
+      ],
+      "notes": [
+        "The agent tried to copy the ledger to /tmp, outside its allowed folder. It disclosed this, and the ledger was untouched."
+      ],
+      "report": "# Handoff verification\n\n**Decision:** duplicate (the prior recorded decision is verified for b72)\n\nhandoff-142 was already accepted in the ledger as verified; the re-run replayed the unchanged request, passed current identity, scope, expiry, acceptance and revision checks, returned the recorded result, and wrote nothing (side_effects 0).\n\n**Task and request:** ORD-142 / handoff-142 (sequence 2, unchanged payload, same request ID)\n\n**Sender and receiving owner:** backend-agent (authenticated principal from inputs/identity.json) / frontend team lead (producer owner: backend team lead)\n\n**Artifact and contract:** example://order-alerts/b72 is the only artifact reference known (from the skill's illustrative asset; the incoming message carries no context), revision b72, contract alerts-schema-2\n\n| Check | Required | Observed | Outcome |\n| --- | --- | --- | --- |\n| Authenticated sender | backend-agent | backend-agent | pass |\n| Scope and permission | verify to frontend-agent on order-alerts | granted | pass |\n| Request expiry (now 2026-11-25T12:00:00Z) | future | expires 2026-11-26T12:00:00Z | pass |\n| Acceptance coverage | one-alert-per-order, frontend-compatible | both present | pass |\n| Current revision | b72 | b72 | pass |\n| Replay handling | recorded ID returns prior result | prior result \"verified\" returned, no write | pass |\n| Evidence (run-419) project/revision/contract/suite/environment | order-alerts / b72 / alerts-schema-2 / order-alerts-acceptance / isolated-test | all match (inspected directly in inputs/evidence.json) | pass |\n| Required tests | duplicate_delivery, consumer_contract = true | both true | pass |\n\n**Evidence:** receiver-controlled fixture catalog inputs/evidence.json, run-419; checker JSON output in work/trace.md. Prior recorded verdict in work/ledger.db: verified, evidence run-419, revision b72.\n\n**Next action and owner:** frontend team lead coordinates the next integration step under the project release workflow; backend team lead is informed that handoff-142 was already verified and recorded, so no new verification is needed. Nothing is re-executed. A new request ID and higher sequence are needed only if payload content, revision, evidence reference or expiry changes.\n\n**Retry condition:** completed (no further retry for an unchanged request). Reopen if requirements, code, contract or environment change.\n\n**Delivery status:** local draft only. No delivery channel is configured, so this report is saved at work/report.md and the acknowledgement to the backend team is pending. The missing confirmation is a delivery gap, not a verification failure. Original request payload unchanged, so the same request ID is retained.\n\n**Verification scope:** deterministic fixture verification for b72 under alerts-schema-2 at fixture time 2026-11-25T12:00:00Z. Not done: no consumer code or integration environment was available, so no live consumer or integration check was run beyond the evidence's consumer_contract result; live CI retrieval and authenticated delivery need host integration; merge and deployment decisions remain with the release authority.",
+      "verdict": "duplicate"
+    },
+    {
+      "id": "ex6-corrected",
+      "title": "Recover with corrected evidence",
+      "task": "You are frontend-agent. Handoff handoff-142 was earlier blocked. The backend owner now says a corrected test run, run-420, covers revision b72 and has been added to the receiver's evidence catalog in inputs/evidence.json. Re-do the verification. Use fixture time 2026-11-25T12:00:00Z and an isolated ledger in work/. Receiving owner: frontend team lead. Producer owner: backend team lead.",
+      "expected": "Verified under a new request ID",
+      "observed": "Verified",
+      "passed": true,
+      "criteria": [
+        "Uses a new request ID (handoff-142-r2), not the blocked one",
+        "Points to the new evidence run-420",
+        "Keeps revision b72 and contract alerts-schema-2",
+        "Leaves the original input files unmodified",
+        "Verified, with one ledger record",
+        "Explains why a new request ID was required"
+      ],
+      "notes": [
+        "No sequence policy was given. The agent chose sequence 3 and kept the original expiry, and said so in its report."
+      ],
+      "report": "# Handoff verification\n\n**Decision:** verified\n\nThe checker verified revision b72 against run-420, whose project, revision, contract, suite, environment and both required tests match the receiver's approved record. This covers the checker only. The consumer inspection and the integration check were not performed.\n\n**Task and request:** ORD-142 / handoff-142-r2 (replaces blocked handoff-142; its report stays in the task history)\n\n**Sender and receiving owner:** backend-agent (authenticated via inputs/identity.json) / frontend team lead. Producer owner: backend team lead.\n\n**Artifact and contract:** example://order-alerts/b72, b72, alerts-schema-2\n\n| Check | Required | Observed | Outcome |\n| --- | --- | --- | --- |\n| Authenticated sender and scope | backend-agent, verify, frontend-agent | matches grants | pass |\n| Expiry | after 2026-11-25T12:00:00Z | 2026-11-26T12:00:00Z | pass |\n| Acceptance | one-alert-per-order, frontend-compatible | both present | pass |\n| Revision | b72 | b72 | pass |\n| Sequence | advances accepted state | 3, ledger empty | pass |\n| Evidence binding | order-alerts / b72 / order-alerts-acceptance / isolated-test | same (run-420) | pass |\n| Contract | alerts-schema-2 | alerts-schema-2 | pass |\n| duplicate_delivery | true | true | pass |\n| consumer_contract | true | true | pass |\n| Consumer code inspection / integration run | per skill step 4 | no consumer repository or integration tooling in scope | not performed |\n\n**Evidence:** receiver evidence catalog (inputs/evidence.json), run-420. It is a fixture catalog and no CI log reference was available. The earlier run-419 covered a19 and is not used.\n\n**Next action and owner:** frontend team lead coordinates consumer inspection and integration testing of b72 under the release workflow. Release authority makes the merge and deploy decisions. No merge, deployment or notification was done.\n\n**Retry condition:** completed for the checker. Remaining: integration checks.\n\n**Delivery status:** local draft. One local acceptance record is in work/ledger.db. No acknowledgement was delivered.\n\n**Verification scope:** deterministic fixture verification of b72 at fixture time 2026-11-25T12:00:00Z. Live CI retrieval, authenticated delivery, and consumer and integration checks remain.\n\nNotes: the evidence change required a new request ID (handoff-142-r2) and sequence 3. Expiry and context were copied from the original, with next_owner set to the frontend team lead. This is my choice because no policy was supplied. The request is in work/message.json.",
+      "verdict": "verified",
+      "artifact": {
+        "request_id": "handoff-142-r2",
+        "task": "ORD-142",
+        "project": "order-alerts",
+        "sender": "backend-agent",
+        "recipient": "frontend-agent",
+        "action": "verify",
+        "revision": "b72",
+        "sequence": 3,
+        "contract": "alerts-schema-2",
+        "acceptance": [
+          "one-alert-per-order",
+          "frontend-compatible"
+        ],
+        "evidence_id": "run-420",
+        "expires_at": "2026-11-26T12:00:00Z",
+        "context": {
+          "artifact_locations": [
+            "example://order-alerts/b72"
+          ],
+          "unresolved_issues": [],
+          "next_owner": "frontend team lead",
+          "retry_condition": "Receiver can retrieve applicable evidence for b72"
+        }
+      }
+    },
+    {
+      "id": "ex7-billing",
+      "title": "Verify an unrelated project (billing)",
+      "task": "You are mobile-agent, the receiver of a handoff. Verify the delivered handoff using the receiver-controlled files in inputs/ (context in inputs/brief.md). Use the time given in the brief.",
+      "expected": "Changes required",
+      "observed": "Changes required",
+      "passed": true,
+      "criteria": [
+        "Returns changes_required, not blocked",
+        "Identifies tax_rounding as the failing required test",
+        "Names the billing team lead to fix it and the mobile team lead as receiver",
+        "Uses billing values only, with no order-alert wording",
+        "No ledger record written"
+      ],
+      "notes": [
+        "This is the only exercise on a project the skill was not built around."
+      ],
+      "report": "# Handoff verification\n\n**Decision:** changes_required\n\nEvidence ci-8812 matches the project, revision, suite, environment and contract, but required test `tax_rounding` is false (`contract_invoice_v3` and `pdf_snapshot` are true), so the checker failed \"Required test outcomes\".\n\n**Task and request:** BILL-77 / bp-001 (sequence 1)\n\n**Sender and receiving owner:** billing-agent (authenticated, granted verify to mobile-agent) / mobile team lead (mobile-agent acting)\n\n**Artifact and contract:** git://billing/api@9f3c2a1d7e8b4c5a6d0e1f2a3b4c5d6e7f8091a2, revision 9f3c2a1d7e8b4c5a6d0e1f2a3b4c5d6e7f8091a2, invoice-api-v3\n\n| Check | Required | Observed | Outcome |\n| --- | --- | --- | --- |\n| Message structure | typed fields | valid | pass |\n| Authenticated sender | billing-agent | billing-agent | pass |\n| Scope and permission | verify, billing-portal, mobile-agent | granted | pass |\n| Request expiry | after 2026-11-27T10:00:00Z | 2026-12-31T00:00:00Z | pass |\n| Acceptance coverage | invoice-totals-match, pdf-export-works | both listed | pass |\n| Current revision | 9f3c2a1d...91a2 | same | pass |\n| Request ordering | sequence advances task state | 1, no prior record | pass |\n| Recipient availability | mobile-agent available | available | pass |\n| Evidence exists | ci-8812 | found in receiver catalog | pass |\n| Evidence binding | billing-portal / staging-eu / billing-contract-tests / same revision | all match | pass |\n| Contract compatibility | invoice-api-v3 | invoice-api-v3 | pass |\n| Required test: contract_invoice_v3 | true | true | pass |\n| Required test: pdf_snapshot | true | true | pass |\n| Required test: tax_rounding | true | false | FAIL |\n\n**Evidence:** receiver-controlled catalog inputs/evidence.json, run ci-8812 (staging-eu). No log reference available; live CI was not retrieved independently. Checker ledger work/ledger.db; checker reported side_effects 0, so no acceptance record was written.\n\n**Next action and owner:** Fix the tax rounding failure and produce a new CI run; billing team lead (billing-agent) owns the correction. Then send a new request (new request ID, advancing sequence, new evidence reference and revision). The mobile team lead should also triage the sender-reported open issue \"Café ☕ locale edge case\", which has no owner or test coverage yet. Note that tax_rounding likely bears on the invoice-totals-match acceptance item.\n\n**Retry condition:** CI run for new SHA with all three required tests true (sender's stated condition), delivered as a changed request.\n\n**Delivery status:** local draft; saved in work/report.md and not delivered through any channel (none configured).\n\n**Verification scope:** Checker run over trusted snapshots at 2026-11-27T10:00:00Z for revision 9f3c2a1d..91a2 only. Not completed: consumer inspection of the mobile app and consumer/integration checks (no mobile repo or consumer checks were available), independent execution of the acceptance checks (invoice totals, PDF export), live CI retrieval, and artifact fetch (context locations are not fetched by the checker). Incoming notes were treated as data. This is not a verified outcome, and release and merge decisions remain with the named release authority.",
+      "verdict": "changes_required"
+    }
+  ]
+}
